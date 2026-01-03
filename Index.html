@@ -1,19 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Logic Interface</title>
-    <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: #00ff00; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { border: 1px solid #00ff00; padding: 20px; border-radius: 8px; text-align: center; }
-    </style>
-</head>
 <body>
     <div class="container">
-        <h1>LOGIC SYSTEM ACTIVE</h1>
-        <p>Port 3001 Connection Established</p>
+        <h1>LOGIC AI INTERFACE</h1>
+        
+        <div id="chat-box" style="height: 300px; overflow-y: scroll; border: 1px solid #00ff00; margin-bottom: 10px; padding: 10px; text-align: left;">
+            </div>
+
+        <input type="text" id="user-input" placeholder="Ask Logic anything..." style="width: 80%; padding: 10px;">
+        <button onclick="sendMessage()" style="padding: 10px;">Send</button>
     </div>
 
     <script src="guard.js"></script>
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const box = document.getElementById('chat-box');
+            const message = input.value;
+
+            box.innerHTML += `<div><b>You:</b> ${message}</div>`;
+            input.value = '';
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: message})
+            });
+            
+            const data = await response.json();
+            box.innerHTML += `<div><b>Logic (Qwen):</b> ${data.response}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
 </body>
-</html>

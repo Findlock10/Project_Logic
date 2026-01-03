@@ -1,28 +1,39 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, request
 import os
+import requests # You might need to run 'pip install requests'
 
 app = Flask(__name__)
 
-# Logic Protocol: Serve the Frontend
 @app.route('/')
 def index():
-    # 'send_from_directory' is the correct modern function
     return send_from_directory(os.getcwd(), 'index.html')
 
-# Serve guard.js for the expiry alert logic
 @app.route('/guard.js')
 def serve_guard():
     return send_from_directory(os.getcwd(), 'guard.js')
 
-# API for the 5-day expiry check
+# The 5-day expiry API
 @app.route('/api/user-status')
 def get_status():
-    # Return 5 days from Jan 3, 2026 for testing
     return jsonify({"expiry_date": "2026-01-08"}) 
+
+# THE NEW AI ROUTE
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json.get('message')
+    
+    # Talking to Ollama
+    ollama_response = requests.post('http://localhost:11434/api/generate', 
+        json={
+            "model": "qwen", # Ensure you have run 'ollama pull qwen'
+            "prompt": user_message,
+            "stream": False
+        })
+    
+    return jsonify(ollama_response.json())
 
 if __name__ == '__main__':
     print("--------------------------------------------------")
-    print("LOGIC ENGINE ONLINE: http://127.0.0.1:3001")
+    print("LOGIC AI ONLINE: http://127.0.0.1:3001")
     print("--------------------------------------------------")
-    # Explicitly binding to 127.0.0.1
     app.run(host='127.0.0.1', port=3001, debug=True)
