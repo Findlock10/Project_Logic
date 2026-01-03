@@ -1,40 +1,28 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import requests
+from flask import Flask, send_from_directory, jsonify
+import os
 
 app = Flask(__name__)
-CORS(app) # Crucial: This allows the browser to talk to Port 3001
 
-@app.route('/process', methods=['POST'])
-def process():
-    try:
-        data = request.json
-        user_text = data.get('text', '')
-        print(f"Logic received: {user_text}")
+# Logic Protocol: Serve the Frontend
+@app.route('/')
+def index():
+    # 'send_from_directory' is the correct modern function
+    return send_from_directory(os.getcwd(), 'index.html')
 
-        # Talking to the Engine (Ollama)
-        payload = {
-            "model": "qwen2.5-coder",
-            "prompt": "Return ONLY text. Text: " + user_text,
-            "stream": False
-        }
-        
-        # We use localhost and a 60-second timeout to prevent 'OFFLINE' flickers
-        response = requests.post('http://localhost:11434/api/generate', json=payload, timeout=60)
-        
-        if response.status_code == 200:
-            ai_text = response.json().get('response', '')
-            return jsonify({"summary": ":) SAFE: " + ai_text})
-        else:
-            return jsonify({"summary": "ENGINE ERROR"}), 500
+# Serve guard.js for the expiry alert logic
+@app.route('/guard.js')
+def serve_guard():
+    return send_from_directory(os.getcwd(), 'guard.js')
 
-    except Exception as e:
-        print(f"Error detail: {e}")
-        return jsonify({"summary": "AI DISCONNECTED"}), 500
+# API for the 5-day expiry check
+@app.route('/api/user-status')
+def get_status():
+    # Return 5 days from Jan 3, 2026 for testing
+    return jsonify({"expiry_date": "2026-01-08"}) 
 
 if __name__ == '__main__':
-    print("------------------------------------")
-    print("LOGIC ENGINE ONLINE: PORT 3001")
-    print("------------------------------------")
-    app.run(port=3001, debug=True)
-
+    print("--------------------------------------------------")
+    print("LOGIC ENGINE ONLINE: http://127.0.0.1:3001")
+    print("--------------------------------------------------")
+    # Explicitly binding to 127.0.0.1
+    app.run(host='127.0.0.1', port=3001, debug=True)
