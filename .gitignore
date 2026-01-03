@@ -1,0 +1,17 @@
+# Python temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+env/
+venv/
+
+# System / Lock Files
+*.lock
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
